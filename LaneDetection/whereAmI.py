@@ -5,8 +5,8 @@ VIDEO_PATH = r"C:\Users\H_\Desktop\4월1일 모라이 차선검출\몇 차선\no
 cap = cv2.VideoCapture(VIDEO_PATH)
 ret, frame = cap.read()
 
-x1, y1, width1, height1 = int(frame.shape[1] * 0.3), int(frame.shape[0] * 0.8), 200, 200
-x2, y2, width2, height2 = int(frame.shape[1] * 0.725), int(frame.shape[0] * 0.8), 200, 200
+x1, y1, width1, height1 = int(frame.shape[1] * 0.275), int(frame.shape[0] * 0.8), 300, 200
+x2, y2, width2, height2 = int(frame.shape[1] * 0.725), int(frame.shape[0] * 0.8), 300, 200
 
 lower_white = np.array([0, 0, 200], dtype=np.uint8)
 upper_white = np.array([180, 30, 255], dtype=np.uint8)
