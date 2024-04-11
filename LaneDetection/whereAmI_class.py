@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import time
 
-VIDEO_PATH = r"C:\Users\User\Desktop\LaneDetection\LaneDetection\no_gps_obstacle#13.avi"
+VIDEO_PATH = r"C:\Users\H_\Desktop\LaneDetection\LaneDetection\no_gps_obstacle#13-case2.avi"
 cap = cv2.VideoCapture(VIDEO_PATH)
 if not cap.isOpened():
     print("="*20)
@@ -25,7 +25,7 @@ class WhereAmI:
         
         self.x1, self.y1, self.width1, self.height1 = int(frame.shape[1] * 0.20), int(frame.shape[0] * 0.8), 300, 200
         self.x2, self.y2, self.width2, self.height2 = int(frame.shape[1] * 0.55), int(frame.shape[0] * 0.8), 300, 200  
-        self.thresh_center_x3, self.thresh_center_y3, self.width3, self.height3 = int(frame.shape[1] * 0.15 + 400), int(frame.shape[0] - 100), 50, 100
+        self.thresh_center_x3, self.thresh_center_y3, self.width3, self.height3 = int(frame.shape[1] * 0.15 + 400), int(frame.shape[0] - 150), 50, 150
         self.crosswalk_center_x4, self.crosswalk_center_y4, self.width4, self.height4 = 0, int(frame.shape[0] * 0.7), int(frame.shape[1]), int(frame.shape[0] - frame.shape[0] * 0.7)
         
         self.lower_white = np.array([0, 0, 200], dtype=np.uint8)
@@ -34,7 +34,7 @@ class WhereAmI:
         self.lower_yellow = np.array([20, 100, 100], dtype=np.uint8)
         self.upper_yellow = np.array([30, 255, 255], dtype=np.uint8)
 
-        self.crossing_centerline_thres = 200
+        self.crossing_centerline_thres = 10
             
         self.lane_info = "LANE 3" 
         self.temp_lane_info = ""
@@ -46,7 +46,7 @@ class WhereAmI:
         output_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-        record_method = cv2.VideoWriter(f'output_GPS13#_NoObstacle-{time.time()}.mp4', fourcc, fps, (output_width, output_height))
+        record_method = cv2.VideoWriter(f'output_GPS13#_NoObstacle-case2.mp4', fourcc, fps, (output_width, output_height))
 
         return record_method
         
@@ -103,11 +103,14 @@ class WhereAmI:
         right_white_pixel = self.count_white_pixel(roi2)
         right_yellow_pixel = self.count_yellow_pixel(roi2)
         
-        self.draw_rectangle(frame)
+        # self.draw_rectangle(frame)
         
         crosswalk_exist = self.find_contour(roi4)
         
         if self.flag == False:
+            if self.lane_info == "LANE 1" or self.lane_info == "Encroaching The CenterLine":
+                above_pixel_cnts = self.count_above_yellow_pixel(roi3)
+
             if len(crosswalk_exist) > 0 and len(crosswalk_exist) < 10:
                 if self.lane_info =="LANE 3":
                     if right_white_pixel > right_yellow_pixel:
@@ -120,24 +123,23 @@ class WhereAmI:
                         self.lane_info = "LANE 3"
                         
                 elif self.lane_info == "LANE 1":
+                    print(above_pixel_cnts, self.crossing_centerline_thres)
                     if left_white_pixel > left_yellow_pixel:
                         self.lane_info = "LANE 2"
-                    above_pixel_cnts = self.count_above_yellow_pixel(roi3)
-                    if above_pixel_cnts >= self.crossing_centerline_thres:
+                    elif above_pixel_cnts >= self.crossing_centerline_thres:
                         self.lane_info = "Possible The Crossing CenterLine"
                 
                 elif self.lane_info == "Possible The Crossing CenterLine":
                     if right_white_pixel > right_yellow_pixel:
                         self.lane_info = "LANE 3"
-                    
                     elif right_white_pixel < right_yellow_pixel:
                         self.lane_info = "Encroaching The CenterLine"
                 
                 elif self.lane_info == "Encroaching The CenterLine":
-                    above_pixel_cnts = self.count_above_yellow_pixel(roi3)
                     if above_pixel_cnts >= self.crossing_centerline_thres:
                         self.lane_info = "Possible The Crossing CenterLine"
-                    self.start_time = time.time()
+                    elif right_white_pixel > right_yellow_pixel:
+                        self.lane_info = "LANE 1"
                     
                 elif self.lane_info == "Crossing The Pedestrian Crosswalk":
                     if len(crosswalk_exist) >= 2 and len(crosswalk_exist) < 4:
@@ -158,6 +160,7 @@ class WhereAmI:
         return frame, self.lane_info
     
     def run(self):
+        record = self.video_record()
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -168,11 +171,10 @@ class WhereAmI:
             
             update_frame, _ = self.detect(frame)
             cv2.putText(update_frame, self.lane_info, self.position, self.font, self.font_scale, self.font_color, self.line_type)
-            # record = self.video_record()
-            # record.write(frame)
+            record.write(frame)
             cv2.imshow("Result", frame)
             
-            if cv2.waitKey(25) & 0xFF == ord('q'):
+            if cv2.waitKey(35) & 0xFF == ord('q'):
                 print("=" * 20)
                 print("KeyBoard Interrupt")
                 print("=" * 20)
@@ -183,7 +185,7 @@ class WhereAmI:
         
 def main():
     hee = WhereAmI()
-    # hee.run()
+    hee.run()
     
 if __name__ == "__main__":
     main()
