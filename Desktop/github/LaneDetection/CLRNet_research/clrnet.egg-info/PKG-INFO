@@ -1,0 +1,27 @@
+Metadata-Version: 2.1
+Name: clrnet
+Version: 1.0
+Keywords: computer vision & lane detection
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+License-File: LICENSE
+Requires-Dist: pandas
+Requires-Dist: addict
+Requires-Dist: scikit-learn
+Requires-Dist: opencv-python
+Requires-Dist: pytorch_warmup
+Requires-Dist: scikit-image
+Requires-Dist: tqdm
+Requires-Dist: p_tqdm
+Requires-Dist: imgaug>=0.4.0
+Requires-Dist: Shapely==1.7.0
+Requires-Dist: ujson==1.35
+Requires-Dist: yapf
+Requires-Dist: pathspec
+Requires-Dist: timm
+Requires-Dist: mmcv==1.2.5
+Requires-Dist: albumentations==0.4.6
+Requires-Dist: pathspec
+Requires-Dist: ptflops
