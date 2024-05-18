@@ -176,10 +176,10 @@ class UltrafastLaneDetector():
 
 			lanes_points.append(lane_points)
 			# 왼쪽 차선의 왼쪽, 현재 차선의 왼쪽, 현재 차선의 오른쪽, 오른쪽 차선의 오른쪽(lanes_points에 담겨져 있음)
-		print(f'left of left lanes : {lanes_points[0]}\n')
-		print(f'left of current lanes : {lanes_points[1]}\n')
-		print(f'right of current lanes : {lanes_points[2]}\n')
-		print(f'right of right lanes : {lanes_points[3]}\n')
+		# print(f'left of left lanes : {lanes_points[0]}\n')
+		# print(f'left of current lanes : {lanes_points[1]}\n')
+		# print(f'right of current lanes : {lanes_points[2]}\n')
+		# print(f'right of right lanes : {lanes_points[3]}\n')
 		return np.array(lanes_points, dtype=object), np.array(lanes_detected, dtype=object)
 
 	@staticmethod
@@ -196,8 +196,10 @@ class UltrafastLaneDetector():
 
 		if(draw_points):
 			for lane_num,lane_points in enumerate(lanes_points):
-				for lane_point in lane_points:
-					cv2.circle(visualization_img, (lane_point[0],lane_point[1]), 3, lane_colors[lane_num], -1)
+				# 현재 달리고 있는 lane만 circle 그리기
+				if lane_num == 1 or lane_num == 2:
+					for lane_point in lane_points:
+						cv2.circle(visualization_img, (lane_point[0],lane_point[1]), 3, lane_colors[lane_num], -1)
 
 		return visualization_img
 
