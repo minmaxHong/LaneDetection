@@ -2,7 +2,14 @@ import cv2
 import torch
 import psutil
 import subprocess
+import numpy as np
 from ultrafastLaneDetector import UltrafastLaneDetector, ModelType
+
+
+def gamma_correction(image, gamma=1.0):
+    inv_gamma = 1 / gamma
+    output = np.uint8(((image / 255) ** inv_gamma) * 255)
+    return output
 
 # 코드 정보
 def hardware_check():
@@ -20,6 +27,7 @@ def hardware_check():
     result = subprocess.run(['nvidia-smi', '--query-gpu=utilization.gpu', '--format=csv,nounits,noheader'], 
                             stdout=subprocess.PIPE)
     gpu_usage = result.stdout.decode('utf-8').strip()
+    
     print('='*30)
     print(f'사용 중인 CPU: {cpu_percent}%')
     print(f"전체 메모리: {total_memory:.2f}GB")
@@ -45,7 +53,9 @@ def process_video(video_path, lane_detector, output_video_path=None):
         ret, frame = cap.read()
         if not ret:
             break
-
+        frame = cv2.resize(frame, (800, 600))
+        frame = gamma_correction(frame, gamma = 0.5)
+        print(frame.shape)
         output_frame = lane_detector.detect_lanes(frame)
         
         if output_video_path:
@@ -53,6 +63,7 @@ def process_video(video_path, lane_detector, output_video_path=None):
 
         hardware_check()
         # output_frame = cv2.resize(output_frame, dsize = (1280, 720))
+        
         cv2.imshow("Detected lanes", output_frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -64,14 +75,14 @@ def process_video(video_path, lane_detector, output_video_path=None):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    model_path = r"/home/macaron/바탕화면/홍성민의 작업공간/Hong_github/PT_weight_file/Ultra_culane_18.pth"
-    video_path = r"/home/macaron/바탕화면/홍성민의 작업공간/Hong_github/test_data/CLRNet_video.mp4"
-    # output_video_path = None
-    output_video_path = r"/home/macaron/바탕화면/홍성민의 작업공간/results_file/tunnel_video_ultrafast_CULANE.mp4" 
+    model_path = r"C:\Users\H_\Desktop\Sungmin_Github\culane_18.pth"
+    video_path = r"C:\Users\H_\Desktop\Sungmin_Github\simulation-autonomousDriving\UltrafastLaneDetection_research\Screencast from 2024년 05월 22일 22시 33분 16초.mp4"
+    output_video_path = None
+    # output_video_path = r"/home/macaron/바탕화면/홍성민의 작업공간/results_file/tunnel_video_ultrafast_CULANE.mp4" 
 
     model_type = ModelType.CULANE
     use_gpu = torch.cuda.is_available()
-    
+    print(use_gpu)
 
     lane_detector = initialize_lane_detector(model_path, model_type, use_gpu)
     process_video(video_path, lane_detector, output_video_path)
